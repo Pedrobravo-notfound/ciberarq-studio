@@ -1042,7 +1042,7 @@
   function act(a, label, cls) { return '<button type="button" class="btn ' + (cls || '') + '" data-act="' + a + '">' + label + '</button>'; }
 
   function renderProps() {
-    cleanSel(); // descarta ids de elementos que ya no existen (tras borrar, deshacer o cargar plantilla)
+    cleanSel(); // descarta ids de elementos que ya no existen (tras borrar, deshacer o abrir un archivo)
     var box = $('#props'), html = '', items = selectedItems(), edges = selectedEdges();
     if (!sel.size) {
       html += '<h3>Diagrama</h3>';
@@ -1329,12 +1329,10 @@
     change(function () { var t = emptyDoc(); doc.items = t.items; doc.edges = t.edges; doc.title = t.title; });
     sel.clear(); view = { x: 60, y: 40, k: 1 }; render(); renderProps();
   });
-  $('#btn-templates').addEventListener('click', openTemplates);
   $('#btn-open').addEventListener('click', openLibrary);
   $('#btn-save').addEventListener('click', openSave);
   $('#btn-export').addEventListener('click', openExport);
   $('#btn-help').addEventListener('click', openHelp);
-  $('#empty-templates').addEventListener('click', openTemplates);
   $('#empty-help').addEventListener('click', openHelp);
   $('#doc-title').addEventListener('focus', function () { propBefore = snap(); });
   $('#doc-title').addEventListener('input', function (e) { doc.title = e.target.value; });
@@ -1363,20 +1361,6 @@
   $('#modal').addEventListener('mousedown', function (e) { if (e.target.id === 'modal') closeModal(); });
   $('#modal-close').addEventListener('click', closeModal);
 
-  function openTemplates() {
-    var T = window.TEMPLATES || [];
-    openModal('Plantillas', '<p class="muted">Patrones de arquitectura listos para usar como punto de partida. Cárgalos y adáptalos a tu escenario.</p><div class="tgrid">' +
-      T.map(function (t, i) { return '<button type="button" class="tcard" data-tpl="' + i + '"><span class="tag">' + esc(t.tag) + '</span><b>' + esc(t.name) + '</b><span>' + esc(t.desc) + '</span></button>'; }).join('') + '</div>', true);
-    $$('[data-tpl]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var t = T[+b.getAttribute('data-tpl')];
-        if (doc.items.length && !confirm('Cargar "' + t.name + '" reemplazará el diagrama actual. ¿Continuar?')) return;
-        var d = t.build();
-        change(function () { doc.title = d.title; doc.items = d.items; doc.edges = d.edges; doc.view = d.view || 'flat'; doc.isoPalette = d.isoPalette || 'azul'; });
-        sel.clear(); closeModal(); fit(); renderProps();
-      });
-    });
-  }
 
   function lib() { try { return JSON.parse(localStorage.getItem(LS_LIB) || '[]'); } catch (e) { return []; } }
   function setLib(l) { try { localStorage.setItem(LS_LIB, JSON.stringify(l)); return true; } catch (e) { alert('No se pudo guardar en el navegador (almacenamiento lleno o bloqueado). Usa "Descargar .json".'); return false; } }
@@ -1518,7 +1502,7 @@
 
   function openHelp() {
     openModal('Ayuda rápida', '<div class="help">' +
-      '<div><h4>Construir</h4><ul><li><b>Arrastra</b> componentes desde la izquierda, o haz <b>clic</b> en uno para ponerlo al centro.</li><li><b>Doble clic en el fondo</b> o tecla <kbd>/</kbd>: buscar y agregar por nombre.</li><li><b>Zonas</b> (DMZ, VLAN, sede, cuenta cloud): se colocan detrás; al moverlas arrastran su contenido.</li><li>Usa <b>Plantillas</b> para partir de un patrón de arquitectura listo.</li><li>Botón <b>3D</b>: vista isométrica (objetos en perspectiva sobre el piso, tuberías y zonas proyectadas). Tu diagrama 2D no cambia; vuelve con <b>Tarjeta</b> o <b>Ícono</b>.</li></ul></div>' +
+      '<div><h4>Construir</h4><ul><li><b>Arrastra</b> componentes desde la izquierda, o haz <b>clic</b> en uno para ponerlo al centro.</li><li><b>Doble clic en el fondo</b> o tecla <kbd>/</kbd>: buscar y agregar por nombre.</li><li><b>Zonas</b> (DMZ, VLAN, sede, cuenta cloud): se colocan detrás; al moverlas arrastran su contenido.</li><li>Botón <b>3D</b>: vista isométrica (objetos en perspectiva sobre el piso, tuberías y zonas proyectadas). Tu diagrama 2D no cambia; vuelve con <b>Tarjeta</b> o <b>Ícono</b>.</li></ul></div>' +
       '<div><h4>Conectar</h4><ul><li>Pasa el mouse sobre un componente y arrastra desde un <b>punto azul</b> hasta el destino.</li><li>Si sueltas en vacío, te propone crear un componente ya conectado.</li><li>O activa <b>Conectar</b> (<kbd>C</kbd>): clic en origen, clic en destino.</li><li>Elige el <b>tipo de línea</b> antes de conectar o cámbialo después en el panel derecho.</li></ul></div>' +
       '<div><h4>Editar</h4><ul><li><b>Doble clic</b> o <kbd>F2</kbd>: renombrar.</li><li>Panel derecho: color/rol, ícono, número, hallazgo y sustento.</li><li><kbd>Shift</kbd> + clic o <kbd>Shift</kbd> + arrastrar: seleccionar varios → alinear/distribuir.</li><li><kbd>Supr</kbd> borrar · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> deshacer/rehacer · <kbd>Ctrl+C</kbd>/<kbd>Ctrl+V</kbd>/<kbd>Ctrl+D</kbd> copiar/pegar/duplicar · flechas mueven.</li></ul></div>' +
       '<div><h4>Navegar</h4><ul><li>Arrastra el fondo (o <kbd>Espacio</kbd>/clic derecho + arrastrar) para moverte.</li><li><kbd>Ctrl</kbd> + rueda (o pellizco en touchpad): zoom · <kbd>0</kbd>: ajustar a la pantalla.</li></ul></div>' +
@@ -1539,16 +1523,9 @@
     var saved = JSON.parse(localStorage.getItem(LS_AUTO) || 'null');
     if (saved && saved.items) { doc = saved; }
   } catch (e) { }
-  // Enlaces directos: ?tpl=N abre una plantilla (si no hay trabajo sin guardar, o con &force=1); ?clean=1 oculta los paneles.
+  // ?clean=1 oculta los paneles (útil para capturas).
   var params = new URLSearchParams(location.search);
   if (params.get('clean') === '1') document.body.classList.add('hide-palette', 'hide-props');
-  var tplN = parseInt(params.get('tpl'), 10), TPL = window.TEMPLATES || [];
-  if (!isNaN(tplN) && TPL[tplN - 1] && (!doc.items.length || params.get('force') === '1' || confirm('¿Abrir la plantilla "' + TPL[tplN - 1].name + '"? Reemplazará el diagrama actual.'))) {
-    var td = TPL[tplN - 1].build();
-    doc = { version: 1, title: td.title, view: td.view || 'flat', isoPalette: td.isoPalette || 'azul', items: td.items, edges: td.edges };
-    if (params.get('view') === '3d' && doc.view !== 'iso') applyView('iso');
-    if (params.get('view') === '2d' && doc.view === 'iso') applyView('flat');
-  }
   afterChange();
   render(); renderProps();
   if (doc.items.length) fit();

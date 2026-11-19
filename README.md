@@ -25,7 +25,6 @@ Es un sitio 100 % estático (HTML + CSS + JavaScript): no tiene dependencias, se
   | Ámbar | Solo detección |
 
 - **9 tipos de línea:** tráfico, política/postura, telemetría al SIEM, flujo del dato, canal de control, réplica, denegado, cable LAN y enlace WAN.
-- **5 plantillas genéricas:** perímetro en 3 capas (DMZ), doble firewall + IPS (screened subnet), referencia Zero Trust, componentes lógicos Zero Trust (NIST SP 800-207) y entorno empresarial en 3D.
 - **Leyenda automática**, **numeración automática** y **tabla de sustento** (componente · por qué se incluye · requisito que atiende). La tabla se puede copiar a Excel/Word, descargar como CSV o insertar en el diagrama.
 - **Exportación** a PNG, SVG, JSON o imprimir/PDF. El trabajo se guarda solo y hay una biblioteca local de diagramas.
 
@@ -41,10 +40,6 @@ Es un sitio 100 % estático (HTML + CSS + JavaScript): no tiene dependencias, se
 | Deshacer / rehacer | `Ctrl+Z` / `Ctrl+Y` |
 | Copiar / pegar / duplicar | `Ctrl+C` / `Ctrl+V` / `Ctrl+D` |
 | Vista 3D | Botón **3D** (vuelves con **Tarjeta** o **Ícono**) |
-
-**Enlaces directos:**
-- `?tpl=N` abre la plantilla N, según su orden en el menú Plantillas.
-- `&view=3d` la abre en 3D. Ejemplo: `?tpl=1&view=3d`.
 
 ## Publicar en Render (gratis)
 
