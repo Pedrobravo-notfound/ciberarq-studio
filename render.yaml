@@ -1,0 +1,15 @@
+# Blueprint de Render: sitio estático (gratis, sin servidor ni build).
+# Render → New → Blueprint → elige este repositorio.
+services:
+  - type: web
+    name: ciberarq-studio
+    runtime: static
+    buildCommand: echo "Sitio estatico, no requiere build"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
