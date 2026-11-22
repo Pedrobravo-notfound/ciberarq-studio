@@ -1,62 +1,96 @@
 # CiberArq Studio
 
-Diagramador web de arquitecturas de ciberseguridad, al estilo de Draw.io y Packet Tracer, con vista 2D y 3D isométrica.
+**Diagramador web de arquitecturas de ciberseguridad, con vista 2D y 3D isométrica.**
+*Web-based cybersecurity architecture diagram editor with 2D and isometric 3D views.*
 
-Es un sitio 100 % estático (HTML + CSS + JavaScript): no tiene dependencias, servidor ni base de datos. Funciona en Render, GitHub Pages o Netlify, y también abriendo `index.html` directamente, sin conexión.
+[![Demo en vivo](https://img.shields.io/badge/demo-en%20vivo-E2231A?style=for-the-badge)](https://ciberarq-studio.onrender.com)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-2F7BE5?style=for-the-badge)](LICENSE)
+![HTML · CSS · JavaScript](https://img.shields.io/badge/HTML%20·%20CSS%20·%20JS-sin%20dependencias-262626?style=for-the-badge)
 
-## Qué incluye
+**▶ Pruébalo en: https://ciberarq-studio.onrender.com**
 
-- **196 componentes** (más 20 zonas y anotaciones) en 16 categorías:
-  - **Infraestructura:** usuarios y terceros, dispositivos, red, nube.
-  - **Seguridad de red y acceso:** firewalls, IDS/IPS, NAC, Zero Trust (PEP, PDP, broker, SSE), IAM (IdP, MFA, PAM, AD).
-  - **Endpoint, datos y aplicaciones:** EDR, UEM, cifrado, KMS/HSM, tokenización, DLP, WAF, API gateway, SAST/SCA/DAST.
-  - **Operación:** monitoreo (SIEM/SOC), resiliencia (respaldo inmutable, réplica, GRC) y elementos DFD/STRIDE.
-- **Vista 3D isométrica** (botón **3D**):
-  - Cada componente se dibuja como un objeto en perspectiva sobre una plataforma: servidores apilados, cubos, torres, tarjetas, cilindros, firewalls con llamas, nubes y personas.
-  - Las zonas y las conexiones se proyectan sobre el piso como tuberías.
-  - Ofrece paleta azul o clásica y separación ajustable, sin modificar el diagrama 2D.
-- **Convención de colores:**
+![Vista 3D isométrica de un entorno empresarial con DMZ y red interna](docs/vista-3d.png)
+
+## ¿Qué es?
+
+CiberArq Studio es un editor de diagramas pensado para diseñar arquitecturas de seguridad: segmentación con DMZ y VLANs, Zero Trust (PEP/PDP), SASE, IAM, protección de endpoints, nube, datos y aplicaciones. Combina la rapidez de Draw.io con iconografía de red al estilo Packet Tracer, y suma una **vista 3D isométrica** que convierte cualquier diagrama en una maqueta en perspectiva.
+
+Funciona 100 % en el navegador: no hay servidor, base de datos ni instalación.
+
+## Características
+
+- **196 componentes de seguridad** en 16 categorías, cada uno con una explicación de qué es y dónde se ubica en una arquitectura. Incluye firewalls/NGFW, WAF, IDS/IPS, NAC, ZTNA, SSE/CASB, IdP/MFA/PAM, Active Directory, EDR/UEM, KMS/HSM, DLP, SIEM/SOC, respaldo inmutable y más.
+- **Vista 3D isométrica**: cada componente se convierte en un objeto en perspectiva sobre una plataforma: servidores apilados, torres, cubos, cilindros, firewalls de ladrillo con llamas, nubes y personas. Las zonas y las conexiones se proyectan sobre el piso como tuberías. Cambiar entre 2D y 3D no altera el diagrama.
+- **Zonas y contenedores** (DMZ, VLAN, sede, cuenta cloud, límite de confianza): al moverlos se desplaza su contenido.
+- **9 tipos de conexión**: tráfico, política, telemetría al SIEM, flujo de datos, canal de control, réplica, denegado, LAN y WAN. Se trazan solas de forma ortogonal y admiten etiquetas y pasos numerados.
+- **Convención de colores**:
 
   | Color | Significado |
   |---|---|
-  | Rojo | Componente de la solución (numerado) |
-  | Negro | Activo protegido o usuario |
+  | Rojo | Control propuesto (numerado) |
+  | Negro | Activo o usuario |
   | Gris | Existente o tercero |
   | Ámbar | Solo detección |
 
-- **9 tipos de línea:** tráfico, política/postura, telemetría al SIEM, flujo del dato, canal de control, réplica, denegado, cable LAN y enlace WAN.
-- **Leyenda automática**, **numeración automática** y **tabla de sustento** (componente · por qué se incluye · requisito que atiende). La tabla se puede copiar a Excel/Word, descargar como CSV o insertar en el diagrama.
-- **Exportación** a PNG, SVG, JSON o imprimir/PDF. El trabajo se guarda solo y hay una biblioteca local de diagramas.
+  La **leyenda se genera automáticamente**.
+- **Tabla de justificación** de cada control (por qué se incluye y qué requisito atiende). Se puede copiar a Excel/Word o exportar a CSV.
+- **Productividad**: deshacer/rehacer, copiar/pegar, alinear y distribuir, búsqueda rápida (`/`), modo conectar (`C`) y autoguardado.
+- **Exportación** a PNG en alta resolución, SVG, JSON e impresión/PDF.
+- **Diseño adaptable**: se puede usar desde una pantalla angosta.
+
+<p align="center"><img src="docs/iconos-3d.png" alt="Íconos 3D isométricos generados por código" width="900"></p>
+
+![Vista 2D con una arquitectura de referencia Zero Trust](docs/vista-2d.png)
+
+## Aspectos técnicos
+
+- **Sin frameworks ni build**: unas 2 500 líneas de JavaScript, CSS y HTML puros, con todo el renderizado en SVG.
+- **Motor isométrico propio** (`js/iso.js`):
+  - Proyección isométrica de 30° mediante matrices SVG.
+  - Objetos 3D generados por código: cajas con tres caras sombreadas, cilindros, flamas con degradados e íconos mapeados sobre caras en perspectiva.
+  - Transformación inversa para arrastrar elementos sobre el piso proyectado.
+- **Editor**:
+  - Ruteo ortogonal de conexiones.
+  - Selección por *hit-testing* sobre el DOM real, válido en 2D y 3D.
+  - Historial de deshacer basado en *snapshots*.
+  - Medición de texto con Canvas para ajustar etiquetas.
+  - Exportación PNG rasterizando el SVG en un `<canvas>`.
+- **Persistencia local** con `localStorage`: autoguardado y biblioteca de diagramas, más importación/exportación JSON.
+- **Despliegue** como sitio estático en Render, con publicación automática en cada `git push`.
+
+## Ejecutar localmente
+
+```bash
+git clone https://github.com/Pedrobravo-notfound/ciberarq-studio.git
+cd ciberarq-studio
+python -m http.server 8080
+```
+
+Luego abre http://localhost:8080. También funciona abriendo `index.html` directamente, sin conexión.
 
 ## Uso rápido
 
 | Acción | Cómo |
 |---|---|
-| Agregar | Arrastra desde la izquierda o haz clic en el componente. Para buscar: doble clic en el fondo o tecla `/` |
-| Conectar | Arrastra desde un punto azul del componente hasta otro; si sueltas en vacío, eliges qué crear. O usa `C` (modo conectar) |
+| Agregar | Arrastra desde la izquierda, haz clic en el componente o pulsa `/` para buscar |
+| Conectar | Arrastra desde un punto azul hasta otro componente, o usa `C` (modo conectar) |
 | Renombrar | Doble clic o `F2` |
-| Seleccionar varios | `Shift` + clic o `Shift` + arrastrar, para alinear o distribuir |
-| Moverse | Arrastra el fondo · `Ctrl` + rueda = zoom · `0` = ajustar a la pantalla |
-| Deshacer / rehacer | `Ctrl+Z` / `Ctrl+Y` |
-| Copiar / pegar / duplicar | `Ctrl+C` / `Ctrl+V` / `Ctrl+D` |
+| Seleccionar varios | `Shift` + clic o `Shift` + arrastrar |
+| Moverse / zoom | Arrastra el fondo · `Ctrl` + rueda · `0` ajusta a la pantalla |
 | Vista 3D | Botón **3D** (vuelves con **Tarjeta** o **Ícono**) |
 
-## Publicar en Render (gratis)
+## Estructura
 
-1. Sube el contenido de esta carpeta a un repositorio de GitHub. `index.html` debe quedar en la raíz.
-2. En Render, crea un sitio estático y conecta ese repositorio:
-   1. Elige **New → Static Site**.
-   2. En **Build command** escribe `echo ok`.
-   3. En **Publish directory** escribe `.`.
-3. Cada `git push` vuelve a publicar el sitio automáticamente.
+```
+index.html          Interfaz
+css/app.css         Estilos (claro, adaptable)
+js/app.js           Editor: render SVG, interacción, historial, exportación
+js/iso.js           Motor de vista 3D isométrica
+js/catalog.js       Catálogo de componentes, roles y tipos de conexión
+js/icons.js         Subconjunto de íconos Lucide
+render.yaml         Configuración de despliegue en Render
+```
 
-Otras opciones:
-- **Blueprint:** usa el `render.yaml` incluido.
-- **GitHub Pages:** activa Pages sobre la rama `main`.
-- **Netlify Drop:** arrastra la carpeta.
+## Licencia
 
-## Tus datos
-
-Todo se guarda **solo en el navegador** donde trabajas (`localStorage`):
-- **Para llevarlo a otra computadora:** usa **Guardar → Descargar .json** y luego **Abrir → Desde un archivo**.
-- **Para compartir el diagrama como imagen:** usa **Exportar → PNG**.
+[MIT](LICENSE). Los íconos provienen de [Lucide](https://lucide.dev) (licencia ISC); ver [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
